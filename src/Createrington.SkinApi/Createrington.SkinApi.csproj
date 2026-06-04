@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>Createrington.SkinApi</PackageId>
+    <Version>1.2.1</Version>
+    <Authors>Matej Hozlar</Authors>
+    <Product>Createrington Skin API</Product>
+    <Description>Official C# client for the Createrington Skin API. Renders Minecraft player skins into named poses and returns PNG bytes.</Description>
+    <Copyright>Copyright (c) 2026 Matej Hozlar</Copyright>
+    <PackageProjectUrl>https://gitea.matejhoz.com/matejhozlar/skin-api-dotnet</PackageProjectUrl>
+    <RepositoryUrl>https://gitea.matejhoz.com/matejhozlar/skin-api-dotnet</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>minecraft;skin;render;createrington;minecraft-skin</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="../../README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Createrington.SkinApi.Tests" />
+  </ItemGroup>
+
+</Project>

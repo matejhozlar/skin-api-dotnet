@@ -1,0 +1,50 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Build and pack only; skip the push to NuGet"
+        required: false
+        default: "false"
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: hetzner
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Refresh KnownPoses from the live OpenAPI document
+        shell: bash
+        run: dotnet run --project tools/GeneratePoses || echo "spec refresh failed; building the committed KnownPoses.cs" >&2
+
+      - name: Restore
+        run: dotnet restore Createrington.SkinApi.sln
+
+      - name: Build
+        run: dotnet build Createrington.SkinApi.sln -c Release --no-restore
+
+      - name: Test
+        run: dotnet test Createrington.SkinApi.sln -c Release --no-build
+
+      - name: Pack
+        run: dotnet pack src/Createrington.SkinApi/Createrington.SkinApi.csproj -c Release --no-build -o artifacts
+
+      - name: Push to NuGet
+        if: ${{ inputs.dry_run != 'true' }}
+        shell: bash
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: dotnet nuget push "artifacts/*.nupkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate
