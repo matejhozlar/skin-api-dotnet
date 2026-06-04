@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://raw.githubusercontent.com/matejhozlar/skin-api-dotnet/main/assets/og-card.png" alt="Createrington Skin API - .NET client" />
+</p>
+
 # Createrington.SkinApi
 
 Official C# client for the Createrington Skin API. Renders Minecraft player
