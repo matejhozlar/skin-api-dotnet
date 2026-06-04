@@ -11,13 +11,13 @@
 
   <PropertyGroup>
     <PackageId>Createrington.SkinApi</PackageId>
-    <Version>2.3.2</Version>
+    <Version>2.3.3</Version>
     <Authors>Matej Hozlar</Authors>
     <Product>Createrington Skin API</Product>
     <Description>Official C# client for the Createrington Skin API. Renders Minecraft player skins into named poses and returns PNG bytes.</Description>
     <Copyright>Copyright (c) 2026 Matej Hozlar</Copyright>
-    <PackageProjectUrl>https://gitea.matejhoz.com/matejhozlar/skin-api-dotnet</PackageProjectUrl>
-    <RepositoryUrl>https://gitea.matejhoz.com/matejhozlar/skin-api-dotnet</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/matejhozlar/skin-api-dotnet</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/matejhozlar/skin-api-dotnet</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>minecraft;skin;render;createrington;minecraft-skin</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
