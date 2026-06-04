@@ -1,7 +1,17 @@
 # Createrington.SkinApi (.NET)
 
-This changelog tracks the C# SDK only. It is versioned and released
-independently of the rest of the repo, via `sdk-net-v<version>` git tags.
+This changelog tracks the Createrington Skin API C# SDK. A release publishes to
+NuGet when a `<Version>` bump is merged to `main`.
+
+## v2.3.2
+
+### Changed
+
+- Relicensed under Apache-2.0 (previously unlicensed). The public API is unchanged.
+- The SDK now lives in its own open-source repository, and `KnownPoses` is
+  generated from the published OpenAPI document rather than from server-side files.
+- Version aligned with the other Createrington Skin API SDKs (Python, TypeScript)
+  so all clients share one version line.
 
 ## v1.2.1
 
