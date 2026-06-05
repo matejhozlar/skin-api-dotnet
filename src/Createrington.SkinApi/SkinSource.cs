@@ -106,8 +106,6 @@ public sealed class SkinSource
 
         var field = Kind switch
         {
-            SourceKind.Uuid => "uuid",
-            SourceKind.Username => "username",
             SourceKind.SkinUrl => "skinUrl",
             SourceKind.SkinBase64 => "skinBase64",
             _ => throw new InvalidOperationException($"Unhandled source kind: {Kind}"),
