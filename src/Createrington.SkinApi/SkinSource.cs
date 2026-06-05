@@ -23,6 +23,20 @@ public sealed class SkinSource
     internal string? Value { get; }
     internal byte[]? Png { get; }
 
+    /// <summary>
+    /// True when the source is resolved server-side from an identifier and is
+    /// passed as a query parameter on a GET request rather than a request body.
+    /// </summary>
+    internal bool IsQuerySource => Kind is SourceKind.Uuid or SourceKind.Username;
+
+    /// <summary>The query parameter name for a <see cref="IsQuerySource"/> source.</summary>
+    internal string QueryField => Kind switch
+    {
+        SourceKind.Uuid => "uuid",
+        SourceKind.Username => "username",
+        _ => throw new InvalidOperationException($"{Kind} is not a query source."),
+    };
+
     private SkinSource(SourceKind kind, string? value, byte[]? png)
     {
         Kind = kind;
@@ -92,8 +106,6 @@ public sealed class SkinSource
 
         var field = Kind switch
         {
-            SourceKind.Uuid => "uuid",
-            SourceKind.Username => "username",
             SourceKind.SkinUrl => "skinUrl",
             SourceKind.SkinBase64 => "skinBase64",
             _ => throw new InvalidOperationException($"Unhandled source kind: {Kind}"),

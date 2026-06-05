@@ -61,7 +61,7 @@ public sealed class SkinApiClientTests
     }
 
     [Fact]
-    public async Task Render_SendsBearerAuthAndJsonBodyForUuid()
+    public async Task Render_Uuid_UsesGetWithQueryParamAndNoBody()
     {
         var (client, handler) = Make(_ => StubHandler.Png());
         var png = await client.RenderAsync(
@@ -71,12 +71,27 @@ public sealed class SkinApiClientTests
 
         var req = handler.Requests[0];
         Assert.Equal(TestData.PngBytes, png);
-        Assert.Equal(HttpMethod.Post, req.Method);
+        Assert.Equal(HttpMethod.Get, req.Method);
         Assert.Equal("/v1/render", req.Uri.AbsolutePath);
-        Assert.Equal("?pose=wave&slim=true&width=200&height=300", req.Uri.Query);
+        Assert.Equal("?pose=wave&uuid=uuid-1&slim=true&width=200&height=300", req.Uri.Query);
         Assert.Equal("Bearer test-key", req.Authorization);
-        Assert.StartsWith("application/json", req.ContentType);
-        Assert.Equal("{\"uuid\":\"uuid-1\"}", req.BodyText);
+        Assert.Null(req.ContentType);
+        Assert.Empty(req.Body);
+    }
+
+    [Fact]
+    public async Task Render_Username_UsesGetWithQueryParamAndNoBody()
+    {
+        var (client, handler) = Make(_ => StubHandler.Png());
+        var png = await client.RenderAsync("wave", SkinSource.FromUsername("Steve"));
+
+        var req = handler.Requests[0];
+        Assert.Equal(TestData.PngBytes, png);
+        Assert.Equal(HttpMethod.Get, req.Method);
+        Assert.Equal("/v1/render", req.Uri.AbsolutePath);
+        Assert.Equal("?pose=wave&username=Steve", req.Uri.Query);
+        Assert.Null(req.ContentType);
+        Assert.Empty(req.Body);
     }
 
     [Fact]
@@ -85,7 +100,7 @@ public sealed class SkinApiClientTests
         var (client, handler) = Make(_ => StubHandler.Png());
         await client.RenderAsync(
             "wave", SkinSource.FromUuid("x"), new RenderOptions { Outline = true });
-        Assert.Equal("?pose=wave&outline=true", handler.Requests[0].Uri.Query);
+        Assert.Equal("?pose=wave&uuid=x&outline=true", handler.Requests[0].Uri.Query);
     }
 
     [Fact]
@@ -94,7 +109,7 @@ public sealed class SkinApiClientTests
         var (client, handler) = Make(_ => StubHandler.Png());
         await client.RenderAsync(
             "wave", SkinSource.FromUuid("x"), new RenderOptions { Outline = false });
-        Assert.Equal("?pose=wave", handler.Requests[0].Uri.Query);
+        Assert.Equal("?pose=wave&uuid=x", handler.Requests[0].Uri.Query);
     }
 
     [Fact]
@@ -102,7 +117,7 @@ public sealed class SkinApiClientTests
     {
         var (client, handler) = Make(_ => StubHandler.Png());
         await client.RenderAsync("wave", SkinSource.FromUuid("x"), new RenderOptions());
-        Assert.Equal("?pose=wave", handler.Requests[0].Uri.Query);
+        Assert.Equal("?pose=wave&uuid=x", handler.Requests[0].Uri.Query);
     }
 
     [Fact]
@@ -119,6 +134,7 @@ public sealed class SkinApiClientTests
         var (client, handler) = Make(_ => StubHandler.Png());
         await client.RenderAsync("wave", SkinSource.FromPng(TestData.PngBytes));
         var req = handler.Requests[0];
+        Assert.Equal(HttpMethod.Post, req.Method);
         Assert.StartsWith("multipart/form-data", req.ContentType);
         Assert.Contains("skin.png", req.BodyText);
     }
@@ -128,7 +144,10 @@ public sealed class SkinApiClientTests
     {
         var (client, handler) = Make(_ => StubHandler.Png());
         await client.RenderAsync("wave", SkinSource.FromUrl("https://example.com/skin.png"));
-        Assert.Equal("{\"skinUrl\":\"https://example.com/skin.png\"}", handler.Requests[0].BodyText);
+        var req = handler.Requests[0];
+        Assert.Equal(HttpMethod.Post, req.Method);
+        Assert.StartsWith("application/json", req.ContentType);
+        Assert.Equal("{\"skinUrl\":\"https://example.com/skin.png\"}", req.BodyText);
     }
 
     [Fact]
@@ -136,7 +155,10 @@ public sealed class SkinApiClientTests
     {
         var (client, handler) = Make(_ => StubHandler.Png());
         await client.RenderAsync("wave", SkinSource.FromBase64("AAAA"));
-        Assert.Equal("{\"skinBase64\":\"AAAA\"}", handler.Requests[0].BodyText);
+        var req = handler.Requests[0];
+        Assert.Equal(HttpMethod.Post, req.Method);
+        Assert.StartsWith("application/json", req.ContentType);
+        Assert.Equal("{\"skinBase64\":\"AAAA\"}", req.BodyText);
     }
 
     [Fact]
