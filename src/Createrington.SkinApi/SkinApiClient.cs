@@ -107,7 +107,8 @@ public sealed class SkinApiClient : IDisposable
         ArgumentException.ThrowIfNullOrEmpty(pose);
         ArgumentNullException.ThrowIfNull(source);
 
-        var requestUri = BuildRequestUri(pose, options);
+        var requestUri = BuildRequestUri(pose, source, options);
+        var method = source.IsQuerySource ? HttpMethod.Get : HttpMethod.Post;
 
         var attempt = 0;
         while (true)
@@ -117,9 +118,9 @@ public sealed class SkinApiClient : IDisposable
             using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             timeoutCts.CancelAfter(_timeout);
 
-            using var request = new HttpRequestMessage(HttpMethod.Post, requestUri)
+            using var request = new HttpRequestMessage(method, requestUri)
             {
-                Content = source.CreateContent(),
+                Content = source.IsQuerySource ? null : source.CreateContent(),
             };
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
             request.Headers.TryAddWithoutValidation("User-Agent", _userAgent);
@@ -191,9 +192,15 @@ public sealed class SkinApiClient : IDisposable
         }
     }
 
-    private Uri BuildRequestUri(string pose, RenderOptions? options)
+    private Uri BuildRequestUri(string pose, SkinSource source, RenderOptions? options)
     {
         var query = new StringBuilder("pose=").Append(Uri.EscapeDataString(pose));
+        if (source.IsQuerySource)
+        {
+            query.Append('&').Append(source.QueryField).Append('=')
+                .Append(Uri.EscapeDataString(source.Value!));
+        }
+
         if (options?.Slim is bool slim)
         {
             query.Append("&slim=").Append(slim ? "true" : "false");
