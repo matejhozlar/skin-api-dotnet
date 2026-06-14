@@ -3,6 +3,17 @@
 This changelog tracks the Createrington Skin API C# SDK. A release publishes to
 NuGet when a `<Version>` bump is merged to `main`.
 
+## v2.5.0
+
+### Added
+
+- `AvatarAsync(source, options?, cancellationToken?)` returns a flat 2D
+  front-view avatar (the head's face with the hat layer composited on top) as a
+  square PNG. It takes the same skin sources as `RenderAsync` and uses the same
+  GET/POST transport, auth, retries, and error handling. `AvatarOptions` exposes
+  `Size` (8..512, default 64) and `Overlay` (default on). Additive and
+  non-breaking.
+
 ## v2.4.0
 
 ### Changed

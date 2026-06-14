@@ -42,6 +42,25 @@ byte[] fromBytes = await client.RenderAsync("wave", SkinSource.FromPng(myPngByte
 `Outline = true` draws a solid outline around the figure; it is off by default,
 and leaving it unset sends nothing extra.
 
+## Avatars
+
+`AvatarAsync` returns a flat 2D front-view avatar: the head's face with the hat
+layer composited on top, as a square PNG. It takes the same skin sources as
+`RenderAsync` but has its own options (`Size`, `Overlay`); there is no pose.
+
+```csharp
+byte[] avatar = await client.AvatarAsync(
+    SkinSource.FromUuid("069a79f444e94726a5befca90e38aaf5"),
+    new AvatarOptions { Size = 128, Overlay = true });
+
+await File.WriteAllBytesAsync("notch-avatar.png", avatar);
+```
+
+`Size` is the square edge length in pixels (8..512, default 64). `Overlay`
+composites the hat layer over the face and is on by default; set it to `false`
+to drop the hat. Both apply to every skin source: the `uuid`/`username` GET
+path, the `skinUrl`/`skinBase64` JSON sources, and multipart uploads.
+
 ## Client
 
 ```csharp
