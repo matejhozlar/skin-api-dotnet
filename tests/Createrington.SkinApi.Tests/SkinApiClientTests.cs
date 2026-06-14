@@ -162,6 +162,147 @@ public sealed class SkinApiClientTests
     }
 
     [Fact]
+    public async Task Avatar_Uuid_UsesGetWithQueryParamsAndNoBody()
+    {
+        var (client, handler) = Make(_ => StubHandler.Png());
+        var png = await client.AvatarAsync(
+            SkinSource.FromUuid("uuid-1"),
+            new AvatarOptions { Size = 128, Overlay = true });
+
+        var req = handler.Requests[0];
+        Assert.Equal(TestData.PngBytes, png);
+        Assert.Equal(HttpMethod.Get, req.Method);
+        Assert.Equal("/v1/avatar", req.Uri.AbsolutePath);
+        Assert.Equal("?uuid=uuid-1&size=128", req.Uri.Query);
+        Assert.Equal("Bearer test-key", req.Authorization);
+        Assert.Null(req.ContentType);
+        Assert.Empty(req.Body);
+    }
+
+    [Fact]
+    public async Task Avatar_Username_UsesGetWithQueryParamAndNoBody()
+    {
+        var (client, handler) = Make(_ => StubHandler.Png());
+        var png = await client.AvatarAsync(SkinSource.FromUsername("Steve"));
+
+        var req = handler.Requests[0];
+        Assert.Equal(TestData.PngBytes, png);
+        Assert.Equal(HttpMethod.Get, req.Method);
+        Assert.Equal("/v1/avatar", req.Uri.AbsolutePath);
+        Assert.Equal("?username=Steve", req.Uri.Query);
+        Assert.Null(req.ContentType);
+        Assert.Empty(req.Body);
+    }
+
+    [Fact]
+    public async Task Avatar_OverlayFalse_SendsOverlayParam()
+    {
+        var (client, handler) = Make(_ => StubHandler.Png());
+        await client.AvatarAsync(SkinSource.FromUuid("x"), new AvatarOptions { Overlay = false });
+        Assert.Equal("?uuid=x&overlay=false", handler.Requests[0].Uri.Query);
+    }
+
+    [Fact]
+    public async Task Avatar_NoOptions_OmitsOptionParams()
+    {
+        var (client, handler) = Make(_ => StubHandler.Png());
+        await client.AvatarAsync(SkinSource.FromUuid("x"), new AvatarOptions());
+        Assert.Equal("?uuid=x", handler.Requests[0].Uri.Query);
+    }
+
+    [Fact]
+    public async Task Avatar_PngSourceWithSize_UsesMultipartAndQueryOptions()
+    {
+        var (client, handler) = Make(_ => StubHandler.Png());
+        await client.AvatarAsync(
+            SkinSource.FromPng(TestData.PngBytes), new AvatarOptions { Size = 256 });
+        var req = handler.Requests[0];
+        Assert.Equal(HttpMethod.Post, req.Method);
+        Assert.Equal("/v1/avatar", req.Uri.AbsolutePath);
+        Assert.Equal("?size=256", req.Uri.Query);
+        Assert.StartsWith("multipart/form-data", req.ContentType);
+        Assert.Contains("skin.png", req.BodyText);
+    }
+
+    [Fact]
+    public async Task Avatar_SkinUrl_MapsToCamelCaseField()
+    {
+        var (client, handler) = Make(_ => StubHandler.Png());
+        await client.AvatarAsync(SkinSource.FromUrl("https://example.com/skin.png"));
+        var req = handler.Requests[0];
+        Assert.Equal(HttpMethod.Post, req.Method);
+        Assert.Equal("/v1/avatar", req.Uri.AbsolutePath);
+        Assert.StartsWith("application/json", req.ContentType);
+        Assert.Equal("{\"skinUrl\":\"https://example.com/skin.png\"}", req.BodyText);
+    }
+
+    [Fact]
+    public async Task Avatar_Base64_MapsToCamelCaseField()
+    {
+        var (client, handler) = Make(_ => StubHandler.Png());
+        await client.AvatarAsync(SkinSource.FromBase64("AAAA"));
+        var req = handler.Requests[0];
+        Assert.Equal(HttpMethod.Post, req.Method);
+        Assert.StartsWith("application/json", req.ContentType);
+        Assert.Equal("{\"skinBase64\":\"AAAA\"}", req.BodyText);
+    }
+
+    [Fact]
+    public async Task Avatar_SetsUserAgent()
+    {
+        var (client, handler) = Make(_ => StubHandler.Png());
+        await client.AvatarAsync(SkinSource.FromUuid("x"));
+        Assert.Equal("createrington-skin-api", handler.Requests[0].UserAgent);
+    }
+
+    [Fact]
+    public async Task Avatar_NullSource_Throws()
+    {
+        var (client, _) = Make(_ => StubHandler.Png());
+        await Assert.ThrowsAsync<ArgumentNullException>(() => client.AvatarAsync(null!));
+    }
+
+    [Fact]
+    public async Task Avatar_NormalizesUpperSnakeErrorCode()
+    {
+        var (client, _) = Make(
+            _ => StubHandler.Json(HttpStatusCode.NotFound,
+                "{\"error\":{\"code\":\"NOT_FOUND\",\"message\":\"Player missing\"}}"),
+            retries: 0);
+
+        var ex = await Assert.ThrowsAsync<SkinApiException>(
+            () => client.AvatarAsync(SkinSource.FromUuid("x")));
+        Assert.Equal(SkinApiErrorCode.NotFound, ex.Code);
+        Assert.Equal(404, ex.Status);
+        Assert.Equal("Player missing", ex.Message);
+    }
+
+    [Fact]
+    public async Task Avatar_Retries429ThenSucceeds()
+    {
+        var (client, handler) = Make(
+            i => i == 0
+                ? StubHandler.Json((HttpStatusCode)429, "{\"error\":{\"code\":\"RATE_LIMITED\",\"retryAfterMs\":5}}")
+                : StubHandler.Png(),
+            retries: 1);
+
+        var png = await client.AvatarAsync(SkinSource.FromUuid("x"));
+        Assert.Equal(TestData.PngBytes, png);
+        Assert.Equal(2, handler.Requests.Count);
+    }
+
+    [Fact]
+    public async Task Avatar_CallerCancellation_PropagatesAndDoesNotSend()
+    {
+        var (client, handler) = Make(_ => StubHandler.Png());
+        using var cts = new CancellationTokenSource();
+        cts.Cancel();
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(
+            () => client.AvatarAsync(SkinSource.FromUuid("x"), cancellationToken: cts.Token));
+        Assert.Empty(handler.Requests);
+    }
+
+    [Fact]
     public void SkinSource_Factories_ValidateInput()
     {
         Assert.Throws<ArgumentException>(() => SkinSource.FromUuid(""));

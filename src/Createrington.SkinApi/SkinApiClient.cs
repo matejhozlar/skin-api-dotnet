@@ -107,7 +107,36 @@ public sealed class SkinApiClient : IDisposable
         ArgumentException.ThrowIfNullOrEmpty(pose);
         ArgumentNullException.ThrowIfNull(source);
 
-        var requestUri = BuildRequestUri(pose, source, options);
+        var requestUri = BuildRenderRequestUri(pose, source, options);
+        return await SendAsync(requestUri, source, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Renders a flat 2D front-view avatar (the head's face with the hat layer
+    /// composited on top) for the given skin source and returns the PNG bytes.
+    /// </summary>
+    /// <param name="source">The skin source, created via a <see cref="SkinSource"/> factory.</param>
+    /// <param name="options">Optional avatar parameters.</param>
+    /// <param name="cancellationToken">A token to cancel the request.</param>
+    /// <returns>The avatar PNG image bytes.</returns>
+    /// <exception cref="SkinApiException">The request failed after exhausting retries.</exception>
+    /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was cancelled.</exception>
+    public async Task<byte[]> AvatarAsync(
+        SkinSource source,
+        AvatarOptions? options = null,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(source);
+
+        var requestUri = BuildAvatarRequestUri(source, options);
+        return await SendAsync(requestUri, source, cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task<byte[]> SendAsync(
+        Uri requestUri,
+        SkinSource source,
+        CancellationToken cancellationToken)
+    {
         var method = source.IsQuerySource ? HttpMethod.Get : HttpMethod.Post;
 
         var attempt = 0;
@@ -192,14 +221,10 @@ public sealed class SkinApiClient : IDisposable
         }
     }
 
-    private Uri BuildRequestUri(string pose, SkinSource source, RenderOptions? options)
+    private Uri BuildRenderRequestUri(string pose, SkinSource source, RenderOptions? options)
     {
         var query = new StringBuilder("pose=").Append(Uri.EscapeDataString(pose));
-        if (source.IsQuerySource)
-        {
-            query.Append('&').Append(source.QueryField).Append('=')
-                .Append(Uri.EscapeDataString(source.Value!));
-        }
+        AppendQuerySource(query, source);
 
         if (options?.Slim is bool slim)
         {
@@ -224,6 +249,48 @@ public sealed class SkinApiClient : IDisposable
         }
 
         return new Uri($"{_baseUrl}/v1/render?{query}");
+    }
+
+    private Uri BuildAvatarRequestUri(SkinSource source, AvatarOptions? options)
+    {
+        var query = new StringBuilder();
+        if (source.IsQuerySource)
+        {
+            query.Append(source.QueryField).Append('=').Append(Uri.EscapeDataString(source.Value!));
+        }
+
+        if (options?.Size is int size)
+        {
+            if (query.Length > 0)
+            {
+                query.Append('&');
+            }
+
+            query.Append("size=").Append(size.ToString(CultureInfo.InvariantCulture));
+        }
+
+        if (options?.Overlay is false)
+        {
+            if (query.Length > 0)
+            {
+                query.Append('&');
+            }
+
+            query.Append("overlay=false");
+        }
+
+        return query.Length > 0
+            ? new Uri($"{_baseUrl}/v1/avatar?{query}")
+            : new Uri($"{_baseUrl}/v1/avatar");
+    }
+
+    private static void AppendQuerySource(StringBuilder query, SkinSource source)
+    {
+        if (source.IsQuerySource)
+        {
+            query.Append('&').Append(source.QueryField).Append('=')
+                .Append(Uri.EscapeDataString(source.Value!));
+        }
     }
 
     private static Task DelayAsync(TimeSpan delay, CancellationToken cancellationToken) =>
