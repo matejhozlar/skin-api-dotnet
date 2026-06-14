@@ -58,8 +58,8 @@ await File.WriteAllBytesAsync("notch-avatar.png", avatar);
 
 `Size` is the square edge length in pixels (8..512, default 64). `Overlay`
 composites the hat layer over the face and is on by default; set it to `false`
-to drop the hat. Both are valid on the `uuid`/`username`/`skinUrl` GET path and
-on uploads.
+to drop the hat. Both apply to every skin source: the `uuid`/`username` GET
+path, the `skinUrl`/`skinBase64` JSON sources, and multipart uploads.
 
 ## Client
 

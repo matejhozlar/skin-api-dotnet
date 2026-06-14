@@ -211,6 +211,14 @@ public sealed class SkinApiClientTests
     }
 
     [Fact]
+    public async Task Avatar_OutOfRangeSize_ForwardsToServerWithoutThrowing()
+    {
+        var (client, handler) = Make(_ => StubHandler.Png());
+        await client.AvatarAsync(SkinSource.FromUuid("x"), new AvatarOptions { Size = 9999 });
+        Assert.Equal("?uuid=x&size=9999", handler.Requests[0].Uri.Query);
+    }
+
+    [Fact]
     public async Task Avatar_PngSourceWithSize_UsesMultipartAndQueryOptions()
     {
         var (client, handler) = Make(_ => StubHandler.Png());

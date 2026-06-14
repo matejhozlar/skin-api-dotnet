@@ -286,11 +286,17 @@ public sealed class SkinApiClient : IDisposable
 
     private static void AppendQuerySource(StringBuilder query, SkinSource source)
     {
-        if (source.IsQuerySource)
+        if (!source.IsQuerySource)
         {
-            query.Append('&').Append(source.QueryField).Append('=')
-                .Append(Uri.EscapeDataString(source.Value!));
+            return;
         }
+
+        if (query.Length > 0)
+        {
+            query.Append('&');
+        }
+
+        query.Append(source.QueryField).Append('=').Append(Uri.EscapeDataString(source.Value!));
     }
 
     private static Task DelayAsync(TimeSpan delay, CancellationToken cancellationToken) =>
