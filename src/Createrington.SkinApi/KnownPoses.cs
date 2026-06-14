@@ -21,6 +21,7 @@ public static class KnownPoses
     public const string Friendship = "friendship";
     public const string Gaze = "gaze";
     public const string Handstand = "handstand";
+    public const string Idle = "idle";
     public const string Idol = "idol";
     public const string Kneel = "kneel";
     public const string Ninja = "ninja";
@@ -47,6 +48,7 @@ public static class KnownPoses
         Friendship,
         Gaze,
         Handstand,
+        Idle,
         Idol,
         Kneel,
         Ninja,
