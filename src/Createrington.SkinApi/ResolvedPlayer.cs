@@ -23,7 +23,7 @@ public sealed class ResolvedPlayer
         Username = username;
     }
 
-    internal static ResolvedPlayer FromJson(byte[] body)
+    internal static ResolvedPlayer FromJson(byte[] body, int status)
     {
         try
         {
@@ -50,6 +50,6 @@ public sealed class ResolvedPlayer
         throw new SkinApiException(
             "The server returned a malformed resolve response.",
             SkinApiErrorCode.Unknown,
-            200);
+            status);
     }
 }

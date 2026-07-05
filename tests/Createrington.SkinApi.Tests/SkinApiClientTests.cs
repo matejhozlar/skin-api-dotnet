@@ -370,6 +370,16 @@ public sealed class SkinApiClientTests
     }
 
     [Fact]
+    public async Task Resolve_JsonBodyMissingUuid_ThrowsUnknown()
+    {
+        var (client, _) = Make(_ => StubHandler.Json(HttpStatusCode.OK, "{\"nope\":true}"));
+        var ex = await Assert.ThrowsAsync<SkinApiException>(
+            () => client.ResolveAsync(PlayerIdentifier.FromUuid("x")));
+        Assert.Equal(SkinApiErrorCode.Unknown, ex.Code);
+        Assert.Equal(200, ex.Status);
+    }
+
+    [Fact]
     public async Task Resolve_SetsUserAgent()
     {
         var (client, handler) = Make(_ => StubHandler.Json(HttpStatusCode.OK, ResolvedNotchJson));
