@@ -61,6 +61,27 @@ composites the hat layer over the face and is on by default; set it to `false`
 to drop the hat. Both apply to every skin source: the `uuid`/`username` GET
 path, the `skinUrl`/`skinBase64` JSON sources, and multipart uploads.
 
+## Resolve
+
+`ResolveAsync` resolves a player identity in either direction: a UUID to the
+current username, or a username to the UUID. Identify the player with a
+`PlayerIdentifier` factory; the returned `ResolvedPlayer` carries the canonical
+dashed lowercase `Uuid` and the canonically cased `Username`.
+
+```csharp
+ResolvedPlayer player = await client.ResolveAsync(
+    PlayerIdentifier.FromUsername("notch"));
+
+Console.WriteLine($"{player.Username}: {player.Uuid}");
+// Notch: 069a79f4-44e9-4726-a5be-fca90e38aaf5
+```
+
+`PlayerIdentifier.FromUuid` accepts dashed or compact UUIDs, and the username
+lookup is case-insensitive. `Username` is nullable: in a rare degraded case a
+fallback provider carries no profile name. Lookups share the render pipeline's
+resolution cache, so a recent name change can take up to a day to appear.
+Resolves do not count toward the image volume quota.
+
 ## Client
 
 ```csharp

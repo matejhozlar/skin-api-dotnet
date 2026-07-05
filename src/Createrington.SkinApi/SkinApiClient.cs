@@ -108,7 +108,7 @@ public sealed class SkinApiClient : IDisposable
         ArgumentNullException.ThrowIfNull(source);
 
         var requestUri = BuildRenderRequestUri(pose, source, options);
-        return await SendAsync(requestUri, source, cancellationToken).ConfigureAwait(false);
+        return (await SendAsync(requestUri, source, cancellationToken).ConfigureAwait(false)).Body;
     }
 
     /// <summary>
@@ -129,15 +129,38 @@ public sealed class SkinApiClient : IDisposable
         ArgumentNullException.ThrowIfNull(source);
 
         var requestUri = BuildAvatarRequestUri(source, options);
-        return await SendAsync(requestUri, source, cancellationToken).ConfigureAwait(false);
+        return (await SendAsync(requestUri, source, cancellationToken).ConfigureAwait(false)).Body;
     }
 
-    private async Task<byte[]> SendAsync(
+    /// <summary>
+    /// Resolves a player identity in either direction: a UUID to the current
+    /// username, or a username to the canonical UUID.
+    /// </summary>
+    /// <param name="identifier">The player identifier, created via a <see cref="PlayerIdentifier"/> factory.</param>
+    /// <param name="cancellationToken">A token to cancel the request.</param>
+    /// <returns>The resolved player identity.</returns>
+    /// <exception cref="SkinApiException">
+    /// The request failed after exhausting retries, or a 2xx response carried a
+    /// malformed body (<see cref="SkinApiErrorCode.Unknown"/> with the 2xx status).
+    /// </exception>
+    /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was cancelled.</exception>
+    public async Task<ResolvedPlayer> ResolveAsync(
+        PlayerIdentifier identifier,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(identifier);
+
+        var requestUri = BuildResolveRequestUri(identifier);
+        var (body, status) = await SendAsync(requestUri, source: null, cancellationToken).ConfigureAwait(false);
+        return ResolvedPlayer.FromJson(body, status);
+    }
+
+    private async Task<(byte[] Body, int Status)> SendAsync(
         Uri requestUri,
-        SkinSource source,
+        SkinSource? source,
         CancellationToken cancellationToken)
     {
-        var method = source.IsQuerySource ? HttpMethod.Get : HttpMethod.Post;
+        var method = source is { IsQuerySource: false } ? HttpMethod.Post : HttpMethod.Get;
 
         var attempt = 0;
         while (true)
@@ -149,7 +172,7 @@ public sealed class SkinApiClient : IDisposable
 
             using var request = new HttpRequestMessage(method, requestUri)
             {
-                Content = source.IsQuerySource ? null : source.CreateContent(),
+                Content = source is { IsQuerySource: false } ? source.CreateContent() : null,
             };
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
             request.Headers.TryAddWithoutValidation("User-Agent", _userAgent);
@@ -196,7 +219,8 @@ public sealed class SkinApiClient : IDisposable
             {
                 if (response.IsSuccessStatusCode)
                 {
-                    return await response.Content.ReadAsByteArrayAsync(cancellationToken).ConfigureAwait(false);
+                    var success = await response.Content.ReadAsByteArrayAsync(cancellationToken).ConfigureAwait(false);
+                    return (success, (int)response.StatusCode);
                 }
 
                 var status = (int)response.StatusCode;
@@ -283,6 +307,9 @@ public sealed class SkinApiClient : IDisposable
             ? new Uri($"{_baseUrl}/v1/avatar?{query}")
             : new Uri($"{_baseUrl}/v1/avatar");
     }
+
+    private Uri BuildResolveRequestUri(PlayerIdentifier identifier) =>
+        new($"{_baseUrl}/v1/resolve?{identifier.QueryField}={Uri.EscapeDataString(identifier.Value)}");
 
     private static void AppendQuerySource(StringBuilder query, SkinSource source)
     {
