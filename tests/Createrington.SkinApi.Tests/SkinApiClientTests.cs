@@ -310,6 +310,139 @@ public sealed class SkinApiClientTests
         Assert.Empty(handler.Requests);
     }
 
+    private const string ResolvedNotchJson =
+        "{\"uuid\":\"069a79f4-44e9-4726-a5be-fca90e38aaf5\",\"username\":\"Notch\"}";
+
+    [Fact]
+    public async Task Resolve_Uuid_UsesGetWithQueryParamAndNoBody()
+    {
+        var (client, handler) = Make(_ => StubHandler.Json(HttpStatusCode.OK, ResolvedNotchJson));
+        var player = await client.ResolveAsync(
+            PlayerIdentifier.FromUuid("069a79f444e94726a5befca90e38aaf5"));
+
+        var req = handler.Requests[0];
+        Assert.Equal(HttpMethod.Get, req.Method);
+        Assert.Equal("/v1/resolve", req.Uri.AbsolutePath);
+        Assert.Equal("?uuid=069a79f444e94726a5befca90e38aaf5", req.Uri.Query);
+        Assert.Equal("Bearer test-key", req.Authorization);
+        Assert.Null(req.ContentType);
+        Assert.Empty(req.Body);
+        Assert.Equal("069a79f4-44e9-4726-a5be-fca90e38aaf5", player.Uuid);
+        Assert.Equal("Notch", player.Username);
+    }
+
+    [Fact]
+    public async Task Resolve_Username_UsesGetWithQueryParamAndNoBody()
+    {
+        var (client, handler) = Make(_ => StubHandler.Json(HttpStatusCode.OK, ResolvedNotchJson));
+        var player = await client.ResolveAsync(PlayerIdentifier.FromUsername("notch"));
+
+        var req = handler.Requests[0];
+        Assert.Equal(HttpMethod.Get, req.Method);
+        Assert.Equal("/v1/resolve", req.Uri.AbsolutePath);
+        Assert.Equal("?username=notch", req.Uri.Query);
+        Assert.Null(req.ContentType);
+        Assert.Empty(req.Body);
+        Assert.Equal("069a79f4-44e9-4726-a5be-fca90e38aaf5", player.Uuid);
+        Assert.Equal("Notch", player.Username);
+    }
+
+    [Fact]
+    public async Task Resolve_NullUsernameInResponse_ParsesAsNull()
+    {
+        var (client, _) = Make(_ => StubHandler.Json(
+            HttpStatusCode.OK,
+            "{\"uuid\":\"069a79f4-44e9-4726-a5be-fca90e38aaf5\",\"username\":null}"));
+
+        var player = await client.ResolveAsync(PlayerIdentifier.FromUuid("x"));
+        Assert.Equal("069a79f4-44e9-4726-a5be-fca90e38aaf5", player.Uuid);
+        Assert.Null(player.Username);
+    }
+
+    [Fact]
+    public async Task Resolve_MalformedBody_ThrowsUnknown()
+    {
+        var (client, _) = Make(_ => StubHandler.Json(HttpStatusCode.OK, "not json"));
+        var ex = await Assert.ThrowsAsync<SkinApiException>(
+            () => client.ResolveAsync(PlayerIdentifier.FromUuid("x")));
+        Assert.Equal(SkinApiErrorCode.Unknown, ex.Code);
+        Assert.Equal(200, ex.Status);
+    }
+
+    [Fact]
+    public async Task Resolve_JsonBodyMissingUuid_ThrowsUnknown()
+    {
+        var (client, _) = Make(_ => StubHandler.Json(HttpStatusCode.OK, "{\"nope\":true}"));
+        var ex = await Assert.ThrowsAsync<SkinApiException>(
+            () => client.ResolveAsync(PlayerIdentifier.FromUuid("x")));
+        Assert.Equal(SkinApiErrorCode.Unknown, ex.Code);
+        Assert.Equal(200, ex.Status);
+    }
+
+    [Fact]
+    public async Task Resolve_SetsUserAgent()
+    {
+        var (client, handler) = Make(_ => StubHandler.Json(HttpStatusCode.OK, ResolvedNotchJson));
+        await client.ResolveAsync(PlayerIdentifier.FromUuid("x"));
+        Assert.Equal("createrington-skin-api", handler.Requests[0].UserAgent);
+    }
+
+    [Fact]
+    public async Task Resolve_NullIdentifier_Throws()
+    {
+        var (client, _) = Make(_ => StubHandler.Json(HttpStatusCode.OK, ResolvedNotchJson));
+        await Assert.ThrowsAsync<ArgumentNullException>(() => client.ResolveAsync(null!));
+    }
+
+    [Fact]
+    public async Task Resolve_NotFound_MapsErrorCode()
+    {
+        var (client, _) = Make(
+            _ => StubHandler.Json(HttpStatusCode.NotFound,
+                "{\"error\":{\"code\":\"NOT_FOUND\",\"message\":\"Player missing\"}}"),
+            retries: 0);
+
+        var ex = await Assert.ThrowsAsync<SkinApiException>(
+            () => client.ResolveAsync(PlayerIdentifier.FromUsername("ghost")));
+        Assert.Equal(SkinApiErrorCode.NotFound, ex.Code);
+        Assert.Equal(404, ex.Status);
+        Assert.Equal("Player missing", ex.Message);
+    }
+
+    [Fact]
+    public async Task Resolve_Retries429ThenSucceeds()
+    {
+        var (client, handler) = Make(
+            i => i == 0
+                ? StubHandler.Json((HttpStatusCode)429, "{\"error\":{\"code\":\"RATE_LIMITED\",\"retryAfterMs\":5}}")
+                : StubHandler.Json(HttpStatusCode.OK, ResolvedNotchJson),
+            retries: 1);
+
+        var player = await client.ResolveAsync(PlayerIdentifier.FromUuid("x"));
+        Assert.Equal("Notch", player.Username);
+        Assert.Equal(2, handler.Requests.Count);
+    }
+
+    [Fact]
+    public async Task Resolve_CallerCancellation_PropagatesAndDoesNotSend()
+    {
+        var (client, handler) = Make(_ => StubHandler.Json(HttpStatusCode.OK, ResolvedNotchJson));
+        using var cts = new CancellationTokenSource();
+        cts.Cancel();
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(
+            () => client.ResolveAsync(PlayerIdentifier.FromUuid("x"), cancellationToken: cts.Token));
+        Assert.Empty(handler.Requests);
+    }
+
+    [Fact]
+    public void PlayerIdentifier_Factories_ValidateInput()
+    {
+        Assert.Throws<ArgumentException>(() => PlayerIdentifier.FromUuid(""));
+        Assert.Throws<ArgumentException>(() => PlayerIdentifier.FromUsername("  "));
+        Assert.Throws<ArgumentNullException>(() => PlayerIdentifier.FromUuid(null!));
+        Assert.Throws<ArgumentNullException>(() => PlayerIdentifier.FromUsername(null!));
+    }
+
     [Fact]
     public void SkinSource_Factories_ValidateInput()
     {
