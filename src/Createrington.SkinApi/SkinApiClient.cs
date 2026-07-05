@@ -132,12 +132,32 @@ public sealed class SkinApiClient : IDisposable
         return await SendAsync(requestUri, source, cancellationToken).ConfigureAwait(false);
     }
 
+    /// <summary>
+    /// Resolves a player identity in either direction: a UUID to the current
+    /// username, or a username to the canonical UUID.
+    /// </summary>
+    /// <param name="identifier">The player identifier, created via a <see cref="PlayerIdentifier"/> factory.</param>
+    /// <param name="cancellationToken">A token to cancel the request.</param>
+    /// <returns>The resolved player identity.</returns>
+    /// <exception cref="SkinApiException">The request failed after exhausting retries.</exception>
+    /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was cancelled.</exception>
+    public async Task<ResolvedPlayer> ResolveAsync(
+        PlayerIdentifier identifier,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(identifier);
+
+        var requestUri = BuildResolveRequestUri(identifier);
+        var body = await SendAsync(requestUri, source: null, cancellationToken).ConfigureAwait(false);
+        return ResolvedPlayer.FromJson(body);
+    }
+
     private async Task<byte[]> SendAsync(
         Uri requestUri,
-        SkinSource source,
+        SkinSource? source,
         CancellationToken cancellationToken)
     {
-        var method = source.IsQuerySource ? HttpMethod.Get : HttpMethod.Post;
+        var method = source is { IsQuerySource: false } ? HttpMethod.Post : HttpMethod.Get;
 
         var attempt = 0;
         while (true)
@@ -149,7 +169,7 @@ public sealed class SkinApiClient : IDisposable
 
             using var request = new HttpRequestMessage(method, requestUri)
             {
-                Content = source.IsQuerySource ? null : source.CreateContent(),
+                Content = source is { IsQuerySource: false } ? source.CreateContent() : null,
             };
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
             request.Headers.TryAddWithoutValidation("User-Agent", _userAgent);
@@ -283,6 +303,9 @@ public sealed class SkinApiClient : IDisposable
             ? new Uri($"{_baseUrl}/v1/avatar?{query}")
             : new Uri($"{_baseUrl}/v1/avatar");
     }
+
+    private Uri BuildResolveRequestUri(PlayerIdentifier identifier) =>
+        new($"{_baseUrl}/v1/resolve?{identifier.QueryField}={Uri.EscapeDataString(identifier.Value)}");
 
     private static void AppendQuerySource(StringBuilder query, SkinSource source)
     {

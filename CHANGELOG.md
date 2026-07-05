@@ -3,6 +3,18 @@
 This changelog tracks the Createrington Skin API C# SDK. A release publishes to
 NuGet when a `<Version>` bump is merged to `main`.
 
+## v2.6.0
+
+### Added
+
+- `ResolveAsync(identifier, cancellationToken?)` resolves a player identity in
+  either direction via `GET /v1/resolve`: a UUID to the current username, or a
+  username to the canonical UUID. `PlayerIdentifier.FromUuid`/`FromUsername`
+  admit exactly one identifier, and the returned `ResolvedPlayer` carries the
+  canonical dashed lowercase `Uuid` and a nullable `Username`. Uses the same
+  transport, auth, retries, and error handling as the image endpoints; resolves
+  do not count toward the volume quota. Additive and non-breaking.
+
 ## v2.5.0
 
 ### Added

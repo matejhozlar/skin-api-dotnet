@@ -11,7 +11,7 @@
 
   <PropertyGroup>
     <PackageId>Createrington.SkinApi</PackageId>
-    <Version>2.5.0</Version>
+    <Version>2.6.0</Version>
     <Authors>Matej Hozlar</Authors>
     <Product>Createrington Skin API</Product>
     <Description>Official C# client for the Createrington Skin API. Renders Minecraft player skins into named poses and returns PNG bytes.</Description>
