@@ -22,6 +22,7 @@ public static class KnownPoses
     public const string Dab = "dab";
     public const string Dead = "dead";
     public const string Defeat = "defeat";
+    public const string Engineer = "engineer";
     public const string Friendship = "friendship";
     public const string Gaze = "gaze";
     public const string Handstand = "handstand";
@@ -55,6 +56,7 @@ public static class KnownPoses
         Dab,
         Dead,
         Defeat,
+        Engineer,
         Friendship,
         Gaze,
         Handstand,
