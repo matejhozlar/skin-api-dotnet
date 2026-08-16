@@ -3,6 +3,17 @@
 This changelog tracks the Createrington Skin API C# SDK. A release publishes to
 NuGet when a `<Version>` bump is merged to `main`.
 
+## v2.8.0
+
+### Added
+
+- New pose in the known pose list, refreshed from the published OpenAPI
+  contract: `engineer` (30 poses total), the first pose rendered with props
+  (a Create wrench in hand and engineer goggles on the head). The server
+  already accepted it, since the render methods take any pose string; this
+  release adds the name to `KnownPoses` for build-time constants and
+  completion. Additive and non-breaking.
+
 ## v2.7.0
 
 ### Added
