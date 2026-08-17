@@ -22,6 +22,7 @@ public static class KnownPoses
     public const string Dab = "dab";
     public const string Dead = "dead";
     public const string Defeat = "defeat";
+    public const string Delivery = "delivery";
     public const string Engineer = "engineer";
     public const string Friendship = "friendship";
     public const string Gaze = "gaze";
@@ -34,8 +35,10 @@ public static class KnownPoses
     public const string Ninja = "ninja";
     public const string Point = "point";
     public const string Ponder = "ponder";
+    public const string Pressed = "pressed";
     public const string Relaxed = "relaxed";
     public const string Scared = "scared";
+    public const string Snagged = "snagged";
     public const string Sprint = "sprint";
     public const string Tiptoe = "tiptoe";
     public const string Victory = "victory";
@@ -56,6 +59,7 @@ public static class KnownPoses
         Dab,
         Dead,
         Defeat,
+        Delivery,
         Engineer,
         Friendship,
         Gaze,
@@ -68,8 +72,10 @@ public static class KnownPoses
         Ninja,
         Point,
         Ponder,
+        Pressed,
         Relaxed,
         Scared,
+        Snagged,
         Sprint,
         Tiptoe,
         Victory,
