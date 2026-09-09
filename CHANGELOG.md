@@ -3,6 +3,19 @@
 This changelog tracks the Createrington Skin API C# SDK. A release publishes to
 NuGet when a `<Version>` bump is merged to `main`.
 
+## v2.10.0
+
+### Added
+
+- Three new poses in the known pose list, refreshed from the published OpenAPI
+  contract: `diver`, `airborne`, and `toasty` (36 poses total), all built
+  around Create props (a copper diving helmet, backtank and boots; an encased
+  fan; a lit blaze burner), with the fan airflow and burner smoke drawn as
+  camera-facing particle sprites. The server already accepted them, since
+  `RenderAsync` takes any pose string; this release adds the constants to
+  `KnownPoses` for discoverability and compile-time names. Additive and
+  non-breaking.
+
 ## v2.9.0
 
 ### Added

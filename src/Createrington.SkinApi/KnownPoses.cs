@@ -11,6 +11,7 @@ namespace Createrington.SkinApi;
 /// </summary>
 public static class KnownPoses
 {
+    public const string Airborne = "airborne";
     public const string Britzel = "britzel";
     public const string Callout = "callout";
     public const string Cheer = "cheer";
@@ -23,6 +24,7 @@ public static class KnownPoses
     public const string Dead = "dead";
     public const string Defeat = "defeat";
     public const string Delivery = "delivery";
+    public const string Diver = "diver";
     public const string Engineer = "engineer";
     public const string Friendship = "friendship";
     public const string Gaze = "gaze";
@@ -41,6 +43,7 @@ public static class KnownPoses
     public const string Snagged = "snagged";
     public const string Sprint = "sprint";
     public const string Tiptoe = "tiptoe";
+    public const string Toasty = "toasty";
     public const string Victory = "victory";
     public const string Wave = "wave";
     public const string Zombie = "zombie";
@@ -48,6 +51,7 @@ public static class KnownPoses
     /// <summary>All poses known to the SDK at build time, sorted alphabetically.</summary>
     public static readonly IReadOnlyList<string> All = new[]
     {
+        Airborne,
         Britzel,
         Callout,
         Cheer,
@@ -60,6 +64,7 @@ public static class KnownPoses
         Dead,
         Defeat,
         Delivery,
+        Diver,
         Engineer,
         Friendship,
         Gaze,
@@ -78,6 +83,7 @@ public static class KnownPoses
         Snagged,
         Sprint,
         Tiptoe,
+        Toasty,
         Victory,
         Wave,
         Zombie,
