@@ -12,6 +12,7 @@ namespace Createrington.SkinApi;
 public static class KnownPoses
 {
     public const string Airborne = "airborne";
+    public const string Boxed = "boxed";
     public const string Britzel = "britzel";
     public const string Callout = "callout";
     public const string Cheer = "cheer";
@@ -26,6 +27,7 @@ public static class KnownPoses
     public const string Delivery = "delivery";
     public const string Diver = "diver";
     public const string Engineer = "engineer";
+    public const string Extended = "extended";
     public const string Friendship = "friendship";
     public const string Gaze = "gaze";
     public const string Handstand = "handstand";
@@ -40,6 +42,7 @@ public static class KnownPoses
     public const string Pressed = "pressed";
     public const string Relaxed = "relaxed";
     public const string Scared = "scared";
+    public const string Shipped = "shipped";
     public const string Snagged = "snagged";
     public const string Sprint = "sprint";
     public const string Tiptoe = "tiptoe";
@@ -52,6 +55,7 @@ public static class KnownPoses
     public static readonly IReadOnlyList<string> All = new[]
     {
         Airborne,
+        Boxed,
         Britzel,
         Callout,
         Cheer,
@@ -66,6 +70,7 @@ public static class KnownPoses
         Delivery,
         Diver,
         Engineer,
+        Extended,
         Friendship,
         Gaze,
         Handstand,
@@ -80,6 +85,7 @@ public static class KnownPoses
         Pressed,
         Relaxed,
         Scared,
+        Shipped,
         Snagged,
         Sprint,
         Tiptoe,
