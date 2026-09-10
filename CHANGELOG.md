@@ -3,6 +3,19 @@
 This changelog tracks the Createrington Skin API C# SDK. A release publishes to
 NuGet when a `<Version>` bump is merged to `main`.
 
+## v2.11.0
+
+### Added
+
+- Three new poses in the known pose list, refreshed from the published OpenAPI
+  contract: `boxed`, `extended`, and `shipped` (39 poses total), all built
+  around Create props (a full cardboard armor set beside a stack of packages;
+  an extendo grip ending in a deployer hand, aimed at the viewer; an
+  andesite-encased belt used as a recliner). The server already accepted them,
+  since `RenderAsync` takes any pose string; this release adds the constants
+  to `KnownPoses` for discoverability and compile-time names. Additive and
+  non-breaking.
+
 ## v2.10.0
 
 ### Added
