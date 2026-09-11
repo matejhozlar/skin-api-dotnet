@@ -3,6 +3,19 @@
 This changelog tracks the Createrington Skin API C# SDK. A release publishes to
 NuGet when a `<Version>` bump is merged to `main`.
 
+## v2.12.0
+
+### Added
+
+- Three new poses in the known pose list, refreshed from the published OpenAPI
+  contract: `fired`, `glazed`, and `licked` (42 poses total), all built around
+  Create props (shot out of a schematicannon in a trail of cloud puffs; glazed
+  by a spout pouring chocolate over the head; licked by a frogport's tongue
+  stretched to the cheek). The server already accepted them, since
+  `RenderAsync` takes any pose string; this release adds the constants to
+  `KnownPoses` for discoverability and compile-time names. Additive and
+  non-breaking.
+
 ## v2.11.0
 
 ### Added
