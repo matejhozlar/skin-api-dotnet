@@ -28,12 +28,15 @@ public static class KnownPoses
     public const string Diver = "diver";
     public const string Engineer = "engineer";
     public const string Extended = "extended";
+    public const string Fired = "fired";
     public const string Friendship = "friendship";
     public const string Gaze = "gaze";
+    public const string Glazed = "glazed";
     public const string Handstand = "handstand";
     public const string Idle = "idle";
     public const string Idol = "idol";
     public const string Kneel = "kneel";
+    public const string Licked = "licked";
     public const string Lounge = "lounge";
     public const string Mojavatar = "mojavatar";
     public const string Ninja = "ninja";
@@ -71,12 +74,15 @@ public static class KnownPoses
         Diver,
         Engineer,
         Extended,
+        Fired,
         Friendship,
         Gaze,
+        Glazed,
         Handstand,
         Idle,
         Idol,
         Kneel,
+        Licked,
         Lounge,
         Mojavatar,
         Ninja,
