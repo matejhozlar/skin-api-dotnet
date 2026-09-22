@@ -40,7 +40,10 @@ byte[] fromBytes = await client.RenderAsync("wave", SkinSource.FromPng(myPngByte
 ```
 
 `Outline = true` draws a solid outline around the figure; it is off by default,
-and leaving it unset sends nothing extra.
+and leaving it unset sends nothing extra. `Style = "cel"` requests the
+cel-shaded rendition (two-tone shading, cast shadows, ink lines and a rim light
+over the skin's own pixels); it combines with `Outline`, and `"default"` or
+unset sends nothing extra.
 
 ## Avatars
 

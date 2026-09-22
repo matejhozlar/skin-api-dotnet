@@ -121,6 +121,24 @@ public sealed class SkinApiClientTests
     }
 
     [Fact]
+    public async Task Render_StyleCel_SendsStyleParam()
+    {
+        var (client, handler) = Make(_ => StubHandler.Png());
+        await client.RenderAsync(
+            "wave", SkinSource.FromUuid("x"), new RenderOptions { Style = "cel" });
+        Assert.Equal("?pose=wave&uuid=x&style=cel", handler.Requests[0].Uri.Query);
+    }
+
+    [Fact]
+    public async Task Render_StyleDefault_OmitsStyleParam()
+    {
+        var (client, handler) = Make(_ => StubHandler.Png());
+        await client.RenderAsync(
+            "wave", SkinSource.FromUuid("x"), new RenderOptions { Style = "default" });
+        Assert.Equal("?pose=wave&uuid=x", handler.Requests[0].Uri.Query);
+    }
+
+    [Fact]
     public async Task Render_SetsUserAgent()
     {
         var (client, handler) = Make(_ => StubHandler.Png());
