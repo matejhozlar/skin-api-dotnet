@@ -262,6 +262,11 @@ public sealed class SkinApiClient : IDisposable
             query.Append("&outline=true");
         }
 
+        if (options?.Style is string style && style != "default")
+        {
+            query.Append("&style=").Append(Uri.EscapeDataString(style));
+        }
+
         if (options?.Width is int width)
         {
             query.Append("&width=").Append(width.ToString(CultureInfo.InvariantCulture));
