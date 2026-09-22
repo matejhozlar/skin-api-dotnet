@@ -3,6 +3,16 @@
 This changelog tracks the Createrington Skin API C# SDK. A release publishes to
 NuGet when a `<Version>` bump is merged to `main`.
 
+## v2.14.0
+
+### Added
+
+- `RenderOptions.Style` (`"default"` or `"cel"`), matching the `style` query
+  parameter published in API 1.8.0. `"cel"` draws two-tone shading, cast
+  shadows, ink lines and a rim light over the skin's own pixels and combines
+  with `Outline`. `null` or `"default"` sends nothing, so existing calls send
+  byte-identical URLs and keep their cache keys.
+
 ## v2.12.0
 
 ### Added
