@@ -19,6 +19,7 @@ public static class KnownPoses
     public const string Confidence = "confidence";
     public const string Crossed = "crossed";
     public const string Crouching = "crouching";
+    public const string Cuckooed = "cuckooed";
     public const string Curl = "curl";
     public const string Cute = "cute";
     public const string Dab = "dab";
@@ -43,6 +44,7 @@ public static class KnownPoses
     public const string Point = "point";
     public const string Ponder = "ponder";
     public const string Pressed = "pressed";
+    public const string Railroaded = "railroaded";
     public const string Relaxed = "relaxed";
     public const string Scared = "scared";
     public const string Shipped = "shipped";
@@ -65,6 +67,7 @@ public static class KnownPoses
         Confidence,
         Crossed,
         Crouching,
+        Cuckooed,
         Curl,
         Cute,
         Dab,
@@ -89,6 +92,7 @@ public static class KnownPoses
         Point,
         Ponder,
         Pressed,
+        Railroaded,
         Relaxed,
         Scared,
         Shipped,
